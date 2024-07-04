@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\etsoo.snk</AssemblyOriginatorKeyFile>
+    <Version>1.0.1</Version>
+    <Authors>ETSOO SmartERP NextGen Team</Authors>
+    <Company>ETSOO / 亿速思维</Company>
+    <Description>Alipay server-side APIs support
+支付宝服务器端接口支持</Description>
+    <Copyright>Copyright © ETSOO 2004 - 2024</Copyright>
+    <PackageProjectUrl>https://www.etsoo.com/SmartERP/</PackageProjectUrl>
+    <PackageIcon>logo.png</PackageIcon>
+    <RepositoryUrl>https://github.com/ETSOO/com.etsoo.AlipayApi</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	  <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="com.etsoo.ApiModel" Version="1.0.55" />
+    <PackageReference Include="com.etsoo.HTTP" Version="1.0.50" />
+  </ItemGroup>
+
+</Project>
