@@ -1,4 +1,7 @@
-﻿namespace com.etsoo.AlipayApi
+﻿using Microsoft.Extensions.Options;
+using System.ComponentModel.DataAnnotations;
+
+namespace com.etsoo.AlipayApi
 {
     /// <summary>
     /// Alipay client options
@@ -9,21 +12,25 @@
         /// <summary>
         /// 程序编号
         /// </summary>
-        public string AppId { get; set; } = string.Empty!;
+        [Required]
+        public required string AppId { get; set; }
 
         /// <summary>
         /// 网关地址，默认为 https://openapi.alipay.com/gateway.do
         /// </summary>
+        [Url]
         public string? Gateway { get; set; }
 
         /// <summary>
         /// 开发设置 - 授权回调地址，用于服务器端应用
         /// </summary>
+        [Url]
         public string? ServerRedirectUrl { get; set; }
 
         /// <summary>
         /// 开发设置 - 授权回调地址，用于网页端应用
         /// </summary>
+        [Url]
         public string? ScriptRedirectUrl { get; set; }
 
         /// <summary>
@@ -55,5 +62,10 @@
         /// 支付宝根证书SN，内部通过安全程序打开 alipayRootCert.crt 计算可得
         /// </summary>
         public string? AlipayRootCertSN { get; set; }
+    }
+
+    [OptionsValidator]
+    public partial class ValidateAlipayClientOptions : IValidateOptions<AlipayClientOptions>
+    {
     }
 }
