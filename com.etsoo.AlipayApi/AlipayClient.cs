@@ -21,6 +21,8 @@ namespace com.etsoo.AlipayApi
     /// </summary>
     public class AlipayClient : HttpClientService, IAlipayClient
     {
+        private const string SignScope = "auth_user";
+
         /// <summary>
         /// Default gateway
         /// 默认网关地址
@@ -51,6 +53,29 @@ namespace com.etsoo.AlipayApi
         public AlipayClient(HttpClient client, IOptions<AlipayClientOptions> options, ILogger<AlipayClient> logger)
             : this(client, options.Value, logger)
         {
+        }
+
+        /// <summary>
+        /// Get sign in URL
+        /// 获取登录URL
+        /// </summary>
+        /// <param name="state">Request state</param>
+        /// <param name="loginHint">Login hint</param>
+        /// <returns>URL</returns>
+        public string GetSignInUrl(string state, string? loginHint = null)
+        {
+            return GetServerAuthUrl(AuthExtentions.SignInAction, state, SignScope, false, loginHint);
+        }
+
+        /// <summary>
+        /// Get sign up URL
+        /// 获取注册URL
+        /// </summary>
+        /// <param name="state">Request state</param>
+        /// <returns>URL</returns>
+        public string GetSignUpUrl(string state)
+        {
+            return GetServerAuthUrl(AuthExtentions.SignUpAction, state, SignScope);
         }
 
         /// <summary>
@@ -128,29 +153,31 @@ namespace com.etsoo.AlipayApi
         /// Get server auth URL, for back-end processing
         /// 获取服务器授权URL，用于后端处理
         /// </summary>
+        /// <param name="action">Action of the request</param>
         /// <param name="state">Specifies any string value that your application uses to maintain state between your authorization request and the authorization server's response</param>
         /// <param name="scope">A space-delimited list of scopes that identify the resources that your application could access on the user's behalf</param>
         /// <param name="offline">Set to true if your application needs to refresh access tokens when the user is not present at the browser</param>
         /// <param name="loginHint">Set the parameter value to an email address or sub identifier, which is equivalent to the user's OpenID</param>
         /// <returns>URL</returns>
-        public string GetServerAuthUrl(string state, string scope, bool offline = false, string? loginHint = null)
+        public string GetServerAuthUrl(string action, string state, string scope, bool offline = false, string? loginHint = null)
         {
             if (offline) scope += " offline_access";
 
-            return GetAuthUrl(_options.ServerRedirectUrl, "code", scope, state, loginHint);
+            return GetAuthUrl($"{_options.ServerRedirectUrl}/{action}", "code", scope, state, loginHint);
         }
 
         /// <summary>
         /// Get script auth URL, for front-end page
         /// 获取脚本授权URL，用于前端页面
         /// </summary>
+        /// <param name="action">Action of the request</param>
         /// <param name="state">Specifies any string value that your application uses to maintain state between your authorization request and the authorization server's response</param>
         /// <param name="scope">A space-delimited list of scopes that identify the resources that your application could access on the user's behalf</param>
         /// <param name="loginHint">Set the parameter value to an email address or sub identifier, which is equivalent to the user's OpenID</param>
         /// <returns>URL</returns>
-        public string GetScriptAuthUrl(string state, string scope, string? loginHint = null)
+        public string GetScriptAuthUrl(string action, string state, string scope, string? loginHint = null)
         {
-            return GetAuthUrl(_options.ScriptRedirectUrl, "token", scope, state, loginHint);
+            return GetAuthUrl($"{_options.ScriptRedirectUrl}/{action}", "token", scope, state, loginHint);
         }
 
         /// <summary>
@@ -199,10 +226,11 @@ namespace com.etsoo.AlipayApi
         /// </summary>
         /// <param name="request">Callback request</param>
         /// <param name="state">Request state</param>
+        /// <param name="action">Request action</param>
         /// <returns>Action result & user information</returns>
-        public ValueTask<(IActionResult result, AuthUserInfo? userInfo)> GetUserInfoAsync(HttpRequest request, string state)
+        public ValueTask<(IActionResult result, AuthUserInfo? userInfo)> GetUserInfoAsync(HttpRequest request, string state, string? action = null)
         {
-            return GetUserInfoAsync(request, s => s == state);
+            return GetUserInfoAsync(request, s => s == state, action);
         }
 
         /// <summary>
@@ -211,10 +239,11 @@ namespace com.etsoo.AlipayApi
         /// </summary>
         /// <param name="request">Callback request</param>
         /// <param name="stateCallback">Callback to verify request state</param>
+        /// <param name="action">Request action</param>
         /// <returns>Action result & user information</returns>
-        public async ValueTask<(IActionResult result, AuthUserInfo? userInfo)> GetUserInfoAsync(HttpRequest request, Func<string, bool> stateCallback)
+        public async ValueTask<(IActionResult result, AuthUserInfo? userInfo)> GetUserInfoAsync(HttpRequest request, Func<string, bool> stateCallback, string? action = null)
         {
-            var (result, tokenData) = await ValidateAuthAsync(request, stateCallback);
+            var (result, tokenData) = await ValidateAuthAsync(request, stateCallback, action);
             AuthUserInfo? userInfo = null;
             if (result.Ok && tokenData != null)
             {
@@ -245,9 +274,10 @@ namespace com.etsoo.AlipayApi
         /// Create access token from authorization code
         /// 从授权码创建访问令牌
         /// </summary>
+        /// <param name="action">Request action</param>
         /// <param name="code">Authorization code</param>
         /// <returns>Token data</returns>
-        public async ValueTask<AlipayTokenData?> CreateTokenAsync(string code)
+        public async ValueTask<AlipayTokenData?> CreateTokenAsync(string action, string code)
         {
             var data = GetApiData(new Dictionary<string, string>
             {
@@ -358,8 +388,9 @@ namespace com.etsoo.AlipayApi
         /// </summary>
         /// <param name="request">Callback request</param>
         /// <param name="stateCallback">Callback to verify request state</param>
+        /// <param name="action">Request action</param>
         /// <returns>Action result & Token data</returns>
-        public async Task<(IActionResult result, AlipayTokenData? tokenData)> ValidateAuthAsync(HttpRequest request, Func<string, bool> stateCallback)
+        public async Task<(IActionResult result, AlipayTokenData? tokenData)> ValidateAuthAsync(HttpRequest request, Func<string, bool> stateCallback, string? action = null)
         {
             IActionResult result;
             AlipayTokenData? tokenData = null;
@@ -395,7 +426,8 @@ namespace com.etsoo.AlipayApi
                 {
                     try
                     {
-                        tokenData = await CreateTokenAsync(code);
+                        action ??= request.GetRequestAction();
+                        tokenData = await CreateTokenAsync(action, code);
 
                         if (tokenData == null)
                         {
