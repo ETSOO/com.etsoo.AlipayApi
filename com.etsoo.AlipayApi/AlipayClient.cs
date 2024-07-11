@@ -3,6 +3,7 @@ using com.etsoo.ApiModel.Auth;
 using com.etsoo.HTTP;
 using com.etsoo.Utils.Actions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
@@ -50,6 +51,7 @@ namespace com.etsoo.AlipayApi
             _gateway = options.Gateway ?? DefaultGateway;
         }
 
+        [ActivatorUtilitiesConstructor]
         public AlipayClient(HttpClient client, IOptions<AlipayClientOptions> options, ILogger<AlipayClient> logger)
             : this(client, options.Value, logger)
         {
