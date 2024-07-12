@@ -209,7 +209,7 @@ namespace com.etsoo.AlipayApi
         /// </summary>
         /// <param name="tokenData">Token data</param>
         /// <returns>Result</returns>
-        public async ValueTask<AlipayUserInfo?> GetUserInfoAsync(AlipayTokenData tokenData)
+        public async ValueTask<AlipayUserInfo?> GetUserInfoAsync(AlipayTokenData tokenData, CancellationToken cancellationToken = default)
         {
             var data = GetApiData(new Dictionary<string, string>
             {
@@ -217,9 +217,9 @@ namespace com.etsoo.AlipayApi
                 ["auth_token"] = tokenData.AccessToken
             });
 
-            var response = await _client.PostAsync(_gateway, new FormUrlEncodedContent(data));
+            var response = await _client.PostAsync(_gateway, new FormUrlEncodedContent(data), cancellationToken);
 
-            return await VerifyResponseAsync(response, "alipay_user_info_share_response", AlipayJsonSerializerContext.Default.AlipayUserInfo);
+            return await VerifyResponseAsync(response, "alipay_user_info_share_response", AlipayJsonSerializerContext.Default.AlipayUserInfo, cancellationToken);
         }
 
         /// <summary>
@@ -229,10 +229,11 @@ namespace com.etsoo.AlipayApi
         /// <param name="request">Callback request</param>
         /// <param name="state">Request state</param>
         /// <param name="action">Request action</param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Action result & user information</returns>
-        public ValueTask<(IActionResult result, AuthUserInfo? userInfo)> GetUserInfoAsync(HttpRequest request, string state, string? action = null)
+        public ValueTask<(IActionResult result, AuthUserInfo? userInfo)> GetUserInfoAsync(HttpRequest request, string state, string? action = null, CancellationToken cancellationToken = default)
         {
-            return GetUserInfoAsync(request, s => s == state, action);
+            return GetUserInfoAsync(request, s => s == state, action, cancellationToken);
         }
 
         /// <summary>
@@ -242,14 +243,15 @@ namespace com.etsoo.AlipayApi
         /// <param name="request">Callback request</param>
         /// <param name="stateCallback">Callback to verify request state</param>
         /// <param name="action">Request action</param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Action result & user information</returns>
-        public async ValueTask<(IActionResult result, AuthUserInfo? userInfo)> GetUserInfoAsync(HttpRequest request, Func<string, bool> stateCallback, string? action = null)
+        public async ValueTask<(IActionResult result, AuthUserInfo? userInfo)> GetUserInfoAsync(HttpRequest request, Func<string, bool> stateCallback, string? action = null, CancellationToken cancellationToken = default)
         {
-            var (result, tokenData) = await ValidateAuthAsync(request, stateCallback, action);
+            var (result, tokenData) = await ValidateAuthAsync(request, stateCallback, action, cancellationToken);
             AuthUserInfo? userInfo = null;
             if (result.Ok && tokenData != null)
             {
-                var data = await GetUserInfoAsync(tokenData);
+                var data = await GetUserInfoAsync(tokenData, cancellationToken);
                 if (data == null)
                 {
                     result = new ActionResult
@@ -278,8 +280,9 @@ namespace com.etsoo.AlipayApi
         /// </summary>
         /// <param name="action">Request action</param>
         /// <param name="code">Authorization code</param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Token data</returns>
-        public async ValueTask<AlipayTokenData?> CreateTokenAsync(string action, string code)
+        public async ValueTask<AlipayTokenData?> CreateTokenAsync(string action, string code, CancellationToken cancellationToken = default)
         {
             var data = GetApiData(new Dictionary<string, string>
             {
@@ -288,12 +291,12 @@ namespace com.etsoo.AlipayApi
                 ["code"] = code
             });
 
-            var response = await _client.PostAsync(_gateway, new FormUrlEncodedContent(data));
+            var response = await _client.PostAsync(_gateway, new FormUrlEncodedContent(data), cancellationToken);
 
-            return await VerifyResponseAsync(response, "alipay_system_oauth_token_response", AlipayJsonSerializerContext.Default.AlipayTokenData);
+            return await VerifyResponseAsync(response, "alipay_system_oauth_token_response", AlipayJsonSerializerContext.Default.AlipayTokenData, cancellationToken);
         }
 
-        private async Task<T?> VerifyResponseAsync<T>(HttpResponseMessage response, string responseField, JsonTypeInfo<T> typeInfo)
+        private async Task<T?> VerifyResponseAsync<T>(HttpResponseMessage response, string responseField, JsonTypeInfo<T> typeInfo, CancellationToken cancellationToken = default)
         {
             response.EnsureSuccessStatusCode();
 
@@ -307,11 +310,11 @@ namespace com.etsoo.AlipayApi
                 encoding = Encoding.GetEncoding(charset);
 
                 // Transcoding stream
-                stream = Encoding.CreateTranscodingStream(await response.Content.ReadAsStreamAsync(), encoding, Encoding.UTF8);
+                stream = Encoding.CreateTranscodingStream(await response.Content.ReadAsStreamAsync(cancellationToken), encoding, Encoding.UTF8);
             }
             else
             {
-                stream = await response.Content.ReadAsStreamAsync();
+                stream = await response.Content.ReadAsStreamAsync(cancellationToken);
             }
 
             return await VerifySignAsync(stream, encoding, responseField, typeInfo);
@@ -322,8 +325,9 @@ namespace com.etsoo.AlipayApi
         /// 用刷新令牌获取访问令牌
         /// </summary>
         /// <param name="refreshToken">Refresh token</param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<AlipayTokenData?> RefreshTokenAsync(string refreshToken)
+        public async Task<AlipayTokenData?> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
         {
             var data = GetApiData(new Dictionary<string, string>
             {
@@ -332,9 +336,9 @@ namespace com.etsoo.AlipayApi
                 ["refresh_token"] = refreshToken
             });
 
-            var response = await _client.PostAsync(_gateway, new FormUrlEncodedContent(data));
+            var response = await _client.PostAsync(_gateway, new FormUrlEncodedContent(data), cancellationToken);
 
-            return await VerifyResponseAsync(response, "alipay_system_oauth_token_response", AlipayJsonSerializerContext.Default.AlipayTokenData);
+            return await VerifyResponseAsync(response, "alipay_system_oauth_token_response", AlipayJsonSerializerContext.Default.AlipayTokenData, cancellationToken);
         }
 
         private async Task<T?> VerifySignAsync<T>(Stream stream, Encoding encoding, string responseField, JsonTypeInfo<T> typeInfo, bool disposeStream = true)
@@ -391,8 +395,9 @@ namespace com.etsoo.AlipayApi
         /// <param name="request">Callback request</param>
         /// <param name="stateCallback">Callback to verify request state</param>
         /// <param name="action">Request action</param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Action result & Token data</returns>
-        public async Task<(IActionResult result, AlipayTokenData? tokenData)> ValidateAuthAsync(HttpRequest request, Func<string, bool> stateCallback, string? action = null)
+        public async Task<(IActionResult result, AlipayTokenData? tokenData)> ValidateAuthAsync(HttpRequest request, Func<string, bool> stateCallback, string? action = null, CancellationToken cancellationToken = default)
         {
             IActionResult result;
             AlipayTokenData? tokenData = null;
@@ -429,7 +434,7 @@ namespace com.etsoo.AlipayApi
                     try
                     {
                         action ??= request.GetRequestAction();
-                        tokenData = await CreateTokenAsync(action, code);
+                        tokenData = await CreateTokenAsync(action, code, cancellationToken);
 
                         if (tokenData == null)
                         {

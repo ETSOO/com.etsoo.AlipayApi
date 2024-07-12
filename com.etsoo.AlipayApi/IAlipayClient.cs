@@ -17,24 +17,27 @@ namespace com.etsoo.AlipayApi
         /// </summary>
         /// <param name="action">Request action</param>
         /// <param name="code">Authorization code</param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Token data</returns>
-        ValueTask<AlipayTokenData?> CreateTokenAsync(string action, string code);
+        ValueTask<AlipayTokenData?> CreateTokenAsync(string action, string code, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get user info
         /// 获取用户信息
         /// </summary>
         /// <param name="tokenData">Token data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        ValueTask<AlipayUserInfo?> GetUserInfoAsync(AlipayTokenData tokenData);
+        ValueTask<AlipayUserInfo?> GetUserInfoAsync(AlipayTokenData tokenData, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Refresh the access token with refresh token
         /// 用刷新令牌获取访问令牌
         /// </summary>
         /// <param name="refreshToken">Refresh token</param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        Task<AlipayTokenData?> RefreshTokenAsync(string refreshToken);
+        Task<AlipayTokenData?> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Validate auth callback
@@ -43,7 +46,8 @@ namespace com.etsoo.AlipayApi
         /// <param name="request">Callback request</param>
         /// <param name="stateCallback">Callback to verify request state</param>
         /// <param name="action">Request action</param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Action result & Token data</returns>
-        Task<(IActionResult result, AlipayTokenData? tokenData)> ValidateAuthAsync(HttpRequest request, Func<string, bool> stateCallback, string? action = null);
+        Task<(IActionResult result, AlipayTokenData? tokenData)> ValidateAuthAsync(HttpRequest request, Func<string, bool> stateCallback, string? action = null, CancellationToken cancellationToken = default);
     }
 }
