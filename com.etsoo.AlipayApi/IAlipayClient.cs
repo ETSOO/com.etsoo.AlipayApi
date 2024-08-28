@@ -47,7 +47,7 @@ namespace com.etsoo.AlipayApi
         /// <param name="stateCallback">Callback to verify request state</param>
         /// <param name="action">Request action</param>
         /// <param name="cancellationToken">Cancellation token</param>
-        /// <returns>Action result & Token data</returns>
-        Task<(IActionResult result, AlipayTokenData? tokenData)> ValidateAuthAsync(HttpRequest request, Func<string, bool> stateCallback, string? action = null, CancellationToken cancellationToken = default);
+        /// <returns>Action result & Token data & actual state</returns>
+        Task<(IActionResult result, AlipayTokenData? tokenData, string? state)> ValidateAuthAsync(HttpRequest request, Func<string, bool> stateCallback, string? action = null, CancellationToken cancellationToken = default);
     }
 }
