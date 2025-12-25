@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	<TargetFramework>net10.0</TargetFramework>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<Nullable>enable</Nullable>
+	<SignAssembly>true</SignAssembly>
+	<AssemblyOriginatorKeyFile>..\etsoo.snk</AssemblyOriginatorKeyFile>
+	<RepositoryType>Git</RepositoryType>
+	<RepositoryUrl>https://github.com/ETSOO/com.etsoo.AlipayApi/com.etsoo.AliAmap</RepositoryUrl>
+	<Authors>ETSOO SmartERP NextGen Team</Authors>
+	<Company>ETSOO / 亿速思维</Company>
+	<Copyright>Copyright © ETSOO 2004 - 2026</Copyright>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<Description>ETSOO Amap APIs
+亿速思维高德地图接口</Description>
+	<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+	<Version>1.0.1</Version>
+	<AssemblyVersion>1.0.1.0</AssemblyVersion>
+	<FileVersion>1.0.1.0</FileVersion>
+	<PackageIcon>logo.png</PackageIcon>
+	<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+	<IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="com.etsoo.ApiModel" Version="1.0.79" />
+  </ItemGroup>
+
+</Project>

@@ -361,7 +361,7 @@ namespace com.etsoo.AlipayApi
                     var sign = doc.RootElement.GetProperty("sign").GetString();
 
                     var rsa = RSA.Create();
-                    var cert = X509Certificate2.CreateFromCertFile(_options.AlipayPublicKeyFile!);
+                    var cert = X509CertificateLoader.LoadCertificateFromFile(_options.AlipayPublicKeyFile!);
                     rsa.ImportRSAPublicKey(cert.GetPublicKey(), out _);
 
                     var rawData = json.GetRawText();
