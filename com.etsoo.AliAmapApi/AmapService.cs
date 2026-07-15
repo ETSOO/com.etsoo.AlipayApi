@@ -57,6 +57,8 @@ namespace com.etsoo.AliAmapApi
 
             var api = $"v3/assistant/inputtips?{query}";
 
+            var text = await client.GetStringAsync(api, cancellationToken);
+
             return await client.GetFromJsonAsync(api, AliAmapApiCallJsonSerializerContext.Default.AmapAutocompleteResponse, cancellationToken);
         }
 

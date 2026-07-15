@@ -21,6 +21,7 @@ namespace com.etsoo.AliAmapApiTests
         {
             var response = await service.AutoCompleteAsync(new AutocompleteRQ
             {
+                City = "青岛市",
                 Keywords = "玫瑰庭院"
             }, TestContext.CancellationToken);
 
